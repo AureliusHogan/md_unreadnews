@@ -31,7 +31,7 @@ class TCEmainHook
     const TABLE = 'tx_news_domain_model_news';
 
     /**
-     * Add unread information for new news record if news category 
+     * Add unread information for new news record if news category
      * matches a configured category in typoscript settings and user belongs
      * to given group.
      *
@@ -42,10 +42,10 @@ class TCEmainHook
      * @param \TYPO3\CMS\Core\DataHandling\DataHandler $pObj parent Object
      */
     public function processDatamap_afterDatabaseOperations(
-        $action, 
-        $table, 
-        $recordUid, 
-        array $fieldArray, 
+        $action,
+        $table,
+        $recordUid,
+        array $fieldArray,
         &$pObj
     )
     {
@@ -64,7 +64,7 @@ class TCEmainHook
                         \TYPO3\CMS\Core\Messaging\FlashMessage::WARNING,
                         true
                     );
-                    
+
                     /** @var \TYPO3\CMS\Core\Messaging\FlashMessageService $flashMessageService */
                     $flashMessageService = GeneralUtility::makeInstance(\TYPO3\CMS\Core\Messaging\FlashMessageService::class);
                     /** @var \TYPO3\CMS\Core\Messaging\FlashMessageQueue $defaultFlashMessageQueue */
@@ -109,24 +109,35 @@ class TCEmainHook
      * @param \TYPO3\CMS\Core\DataHandling\DataHandler $pObj parent Object
      */
     public function processCmdmap_postProcess(
-        $action, 
-        $table, 
-        int $recordUid, 
-        $value, 
+        $action,
+        $table,
+        int $recordUid,
+        $value,
         \TYPO3\CMS\Core\DataHandling\DataHandler &$pObj
     )
     {
         if ($table === self::TABLE && $action == 'delete') {
+            $this->removeUnreadInfo($recordUid);
+        }
+    }
+
+    /**
+     * remove the unread info for news record
+     *
+     * @param int $newsUid Uid ot news record
+     * @return void
+     */
+    protected function removeUnreadInfo( int $newsUid ) :void
+    {
             $databaseConnection = GeneralUtility::makeInstance(ConnectionPool::class)
                                   ->getConnectionForTable('tx_mdunreadnews_domain_model_unreadnews');
 
             $databaseConnection->delete(
-                'tx_mdunreadnews_domain_model_unreadnews', 
-                ['news' => $recordUid]
+                'tx_mdunreadnews_domain_model_unreadnews',
+            ['news' => $newsUid]
             );
         }
-    }
-    
+
 
     /**
      * Save unread info for news record
@@ -136,7 +147,7 @@ class TCEmainHook
      * @param array $typoscriptSettings Typoscript settings
      * @return void
      */
-    private function saveUnreadInfo(int $newsUid, $fieldArray, $typoscriptSettings)
+    protected function saveUnreadInfo(int $newsUid, $fieldArray, $typoscriptSettings)
     {
         $connectionPool = GeneralUtility::makeInstance(ConnectionPool::class);
 
@@ -145,13 +156,13 @@ class TCEmainHook
         $feuserData = $queryBuilderFeusers
                         ->select('fe_users.uid')
                         ->from('fe_users');
-        
+
         // if $allowedGroup is set, just find users with given group
         $allowedGroup = trim($typoscriptSettings['feGroup']);
         if ($allowedGroup) {
-            $feuserData = $feuserData->where( 
+            $feuserData = $feuserData->where(
                                 $queryBuilderFeusers->expr()->inSet(
-                                    'usergroup', 
+                                    'usergroup',
                                     $queryBuilderFeusers->createNamedParameter($allowedGroup, \PDO::PARAM_INT)
                                 )
                             );
@@ -179,7 +190,7 @@ class TCEmainHook
                     'endtime'       => $fieldArray['endtime'],
                 ];
             }
-            
+
             $colNamesArray = ['pid', 'news', 'feuser', 'news_datetime', 'tstamp', 'crdate', 'hidden', 'starttime', 'endtime'];
 
             $dbConnectionUnreadnews = $connectionPool->getConnectionForTable('tx_mdunreadnews_domain_model_unreadnews');
@@ -198,11 +209,11 @@ class TCEmainHook
      * @param array $fieldArray Data of news entry
      * @return void
      */
-    private function updateUnreadInfo(int $newsUid, $fieldArray)
+    protected function updateUnreadInfo(int $newsUid, $fieldArray)
     {
         $databaseConnection = GeneralUtility::makeInstance(ConnectionPool::class)
                               ->getConnectionForTable('tx_mdunreadnews_domain_model_unreadnews');
-        
+
         // build update information
         $arrayUpdateData = ['tstamp' => time()];
         if (isset($fieldArray['datetime'])) {
@@ -234,7 +245,7 @@ class TCEmainHook
      *
      * @return array
      */
-    private function getTyposcriptSettings()
+    protected function getTyposcriptSettings()
     {
         // get typoscript settings
         $configurationManager = GeneralUtility::makeInstance(ConfigurationManager::class);

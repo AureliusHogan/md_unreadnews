@@ -1,6 +1,9 @@
 <?php
 defined('TYPO3_MODE') || die('Access denied.');
 
+//use TYPO3\CMS\Core\Log\LogLevel;
+//use TYPO3\CMS\Core\Log\Writer\FileWriter;
+
 call_user_func(
     function () {
 
@@ -17,7 +20,7 @@ call_user_func(
         );
 
         $iconRegistry = \TYPO3\CMS\Core\Utility\GeneralUtility::makeInstance(\TYPO3\CMS\Core\Imaging\IconRegistry::class);
-        
+
         $iconRegistry->registerIcon(
             'md_unreadnews-plugin-unread',
             \TYPO3\CMS\Core\Imaging\IconProvider\SvgIconProvider::class,
@@ -36,5 +39,42 @@ call_user_func(
             ['t3lib/class.t3lib_tcemain.php']
             ['processCmdmapClass']
             ['md_unreadnews_delete'] = \Mediadreams\MdUnreadnews\Hooks\TCEmainHook::class;
+
+
+        // signal hook to create unread data for frontend news
+        $signalSlotDispatcher = \TYPO3\CMS\Core\Utility\GeneralUtility::makeInstance(\TYPO3\CMS\Extbase\SignalSlot\Dispatcher::class);
+
+// slot for ext:md_newsfrontend
+        $signalSlotDispatcher->connect(
+            \Mediadreams\MdNewsfrontend\Controller\NewsController::class,
+            'createActionAfterPersist',
+            \Mediadreams\MdUnreadnews\Slot\Unread::class,
+            'addUnread'
+        );
+
+// slot for ext:md_newsfrontend
+        $signalSlotDispatcher->connect(
+            \Mediadreams\MdNewsfrontend\Controller\NewsController::class,
+            'updateActionBeforeSave',
+            \Mediadreams\MdUnreadnews\Slot\Unread::class,
+            'updateUnread'
+        );
+
+// slot for ext:md_newsfrontend
+        $signalSlotDispatcher->connect(
+            \Mediadreams\MdNewsfrontend\Controller\NewsController::class,
+            'deleteActionBeforeDelete',
+            \Mediadreams\MdUnreadnews\Slot\Unread::class,
+            'removeUnread'
+        );
+
+//        $GLOBALS['TYPO3_CONF_VARS']['LOG']['Mediadreams']['MdUnreadnews']['Slot']['writerConfiguration'] = [
+//            LogLevel::INFO => [
+//                FileWriter::class => [
+//                    'logFile' => \TYPO3\CMS\Core\Core\Environment::getVarPath() . '/log/typo3_UnreadNews.log'
+//                ]
+//            ]
+//        ];
+
     }
 );
