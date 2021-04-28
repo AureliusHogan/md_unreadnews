@@ -16,6 +16,11 @@
             "name": "Christoph Daecke",
             "email": "typo3@mediadreams.org",
             "role": "Developer"
+        },
+        {
+            "name": "Erich Manser",
+            "email": "erich.manser@avibus.eu",
+            "role": "Developer"
         }
     ],
     "support": {
