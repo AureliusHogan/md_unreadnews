@@ -39,6 +39,7 @@
         }
     },
     "replace": {
-        "typo3-ter/md_unreadnews": "self.version"
+        "typo3-ter/md_unreadnews": "self.version",
+        "mediadreams/md_unreadnews": "self.version"
     }
 }
