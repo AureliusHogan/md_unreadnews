@@ -38,6 +38,11 @@
             "Mediadreams\\MdUnreadnews\\": "Classes"
         }
     },
+    "extra": {
+        "typo3/cms": {
+            "extension-key": "md_unreadnews"
+        }
+    },
     "replace": {
         "typo3-ter/md_unreadnews": "*",
         "mediadreams/md_unreadnews": "*"
