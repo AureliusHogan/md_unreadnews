@@ -78,7 +78,15 @@ class Unread extends TCEmainHook {
             'endtime' => $news->getEndTime() ? $news->getEndtime()->format('U') : 0
         ];
 
-        $this->updateUnreadInfo($newsUid, $fieldArray );
+        $typoscriptSettings = $this->getTyposcriptSettings();
+//        $this->logger->info(__FUNCTION__ , $typoscriptSettings);
+
+        if($typoscriptSettings['setUnreadIfUpdated']){
+            $this->removeUnreadInfo($newsUid);
+            $this->saveUnreadInfo($newsUid, $fieldArray, $typoscriptSettings);
+        } else {
+            $this->updateUnreadInfo($newsUid, $fieldArray);
+        }
     }
 
     /**

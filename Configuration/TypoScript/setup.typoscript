@@ -7,12 +7,12 @@ plugin.tx_mdunreadnews_unread {
             0 = EXT:md_unreadnews/Resources/Private/Templates/
             1 = {$plugin.tx_mdunreadnews_unread.view.templateRootPath}
         }
-        
+
         partialRootPaths {
             0 = EXT:md_unreadnews/Resources/Private/Partials/
             1 = {$plugin.tx_mdunreadnews_unread.view.partialRootPath}
         }
-        
+
         layoutRootPaths {
             0 = EXT:md_unreadnews/Resources/Private/Layouts/
             1 = {$plugin.tx_mdunreadnews_unread.view.layoutRootPath}
@@ -33,7 +33,7 @@ plugin.tx_mdunreadnews_unread {
         # Should be on by default, but can be disabled if all action in the plugin are uncached
         requireCHashArgumentForActionArguments = 1
     }
-    
+
     mvc {
         #callDefaultActionIfActionCantBeResolved = 1
     }
@@ -42,6 +42,7 @@ plugin.tx_mdunreadnews_unread {
         storagePid = {$plugin.tx_mdunreadnews_unread.settings.storagePid}
         categories = {$plugin.tx_mdunreadnews_unread.settings.categories}
         feGroup = {$plugin.tx_mdunreadnews_unread.settings.feGroup}
+        setUnreadIfUpdated = {$plugin.tx_mdunreadnews_unread.settings.setUnreadIfUpdated}
 
         cropMaxCharacters = 150
         displayDummyIfNoMedia = 1

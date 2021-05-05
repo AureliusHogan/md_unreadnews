@@ -12,6 +12,9 @@ namespace Mediadreams\MdUnreadnews\Hooks;
  *
  */
 
+use Psr\Log\LoggerAwareInterface;
+use Psr\Log\LoggerAwareTrait;
+
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 use TYPO3\CMS\Core\Database\ConnectionPool;
 use TYPO3\CMS\Extbase\Configuration\ConfigurationManager;
@@ -20,8 +23,9 @@ use TYPO3\CMS\Extbase\Configuration\ConfigurationManagerInterface;
 /**
  * TCE amin hook
  */
-class TCEmainHook
+class TCEmainHook implements LoggerAwareInterface
 {
+    use LoggerAwareTrait;
 
     /**
      * Name of table
@@ -51,6 +55,7 @@ class TCEmainHook
     {
 
         if ($table === self::TABLE) {
+            $typoscriptSettings = $this->getTyposcriptSettings();
             if ($action == 'new') {
                 // get uid of new record
                 $newsUid = $pObj->substNEWwithIDs[$recordUid];
@@ -74,7 +79,6 @@ class TCEmainHook
                     return;
                 }
 
-                $typoscriptSettings = $this->getTyposcriptSettings();
                 $allowedCategories = GeneralUtility::trimExplode(',', $typoscriptSettings['categories'], true);
 
                 // if there are categories configured in typoscript
@@ -94,7 +98,14 @@ class TCEmainHook
                     $this->saveUnreadInfo($newsUid, $fieldArray, $typoscriptSettings);
                 }
             } else if ($action == 'update') {
-                $this->updateUnreadInfo($recordUid, $fieldArray);
+//                $this->logger->info('processDatamap update:', $typoscriptSettings);
+
+                if($typoscriptSettings['setUnreadIfUpdated']){
+                    $this->removeUnreadInfo($recordUid);
+                    $this->saveUnreadInfo($recordUid, $fieldArray, $typoscriptSettings);
+                } else {
+                    $this->updateUnreadInfo($recordUid, $fieldArray);
+                }
             }
         }
     }
@@ -245,15 +256,26 @@ class TCEmainHook
      *
      * @return array
      */
-    protected function getTyposcriptSettings()
+    protected function getTyposcriptSettings(): array
     {
         // get typoscript settings
         $configurationManager = GeneralUtility::makeInstance(ConfigurationManager::class);
-        $extbaseFrameworkConfiguration = $configurationManager->getConfiguration(
+        $typoScript = $configurationManager->getConfiguration(
             ConfigurationManagerInterface::CONFIGURATION_TYPE_FULL_TYPOSCRIPT
         );
 
+        $settings = [];
+        $extensionName = 'tx_mdunreadnews_unread.';
+
+//        $this->logger->info( __FUNCTION__ . ' ' . $extensionName . ' typoscript: ', $typoScript );
+        if (isset($typoScript['plugin.']) && isset($typoScript['plugin.'][$extensionName]) && isset($typoScript['plugin.'][$extensionName]['settings.'])) {
+            $settings = $typoScript['plugin.'][$extensionName]['settings.'];
+//            $this->logger->info( __FUNCTION__ . ' ' . $extensionName . ': ', $settings );
+        } else {
+//            $this->logger->info( __FUNCTION__ . ': no Settings found for ' . $extensionName );
+        }
+
         // typoscript settings for ext:md_unreadnews plugin "unread"
-        return $extbaseFrameworkConfiguration['plugin.']['tx_mdunreadnews_unread.']['settings.'];
+        return $settings;
     }
 }

@@ -24,6 +24,7 @@ Available constants:
 - ``storagePid``: This is the uid of the page, where you want to store the unread records
 - ``categories``: Comma separated string of category uids. All news records which are connected to a configured category will be marked as unread. If you don't provide a category, all news records will be considered.
 - ``feGroup``: The uid of a feUserGroup. If provided, the unread info will only be set for users, who belong to this group. If not set, all users are considered.
+- ``setUnreadIfUpdated``: If true, the unread records are removed and created again for all users.
 
 
 ## Usage
