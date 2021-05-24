@@ -45,8 +45,13 @@ class Unread extends TCEmainHook {
 
         // if there are categories configured in typoscript
         if (count($allowedCategories) > 0) {
+
+            $categories = [];
+            foreach ($news->getCategories() as $category){
+                $categories[] = $category->getUid();
+            }
             // get selected categories in news record
-            $categories = [$news->getFirstCategory()->getUid()];
+//            $categories = [$news->getFirstCategory()->getUid()];
 
             // check, if category in news record is a category which is configured in typoscript
             $matchedCategories = array_intersect($allowedCategories, $categories);
